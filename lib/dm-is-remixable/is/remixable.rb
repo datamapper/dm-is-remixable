@@ -309,6 +309,7 @@ module DataMapper
         #   options     <Hash> options hash
         def remix_one_to_many(cardinality, model, options)
           self.has cardinality, (options[:as] || options[:table_name]).to_sym, :model => model.name
+          model.property ActiveSupport::Inflector.foreign_key(self.name).intern, Integer, :min => 0, :required => true
           model.belongs_to belongs_to_name(self.name)
         end
 
@@ -380,7 +381,8 @@ module DataMapper
 
           # Port the properties over
           remixable.properties.each do |prop|
-            model.property(prop.name, prop.type, prop.options)
+            type = prop.type ? prop.type : prop.class
+            model.property(prop.name, type, prop.options)
           end
 
           # Attach remixed model access to RemixeeClassMethods and RemixeeInstanceMethods if defined
