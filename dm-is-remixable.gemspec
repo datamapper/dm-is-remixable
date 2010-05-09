@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Cory O'Daniel"]
-  s.date = %q{2010-03-22}
+  s.date = %q{2010-05-10}
   s.description = %q{dm-is-remixable allow you to create reusable data functionality}
   s.email = %q{dm-is-remixable [a] coryodaniel [d] com}
   s.extra_rdoc_files = [
@@ -17,7 +17,8 @@ Gem::Specification.new do |s|
      "README.rdoc"
   ]
   s.files = [
-    "Gemfile",
+    ".gitignore",
+     "Gemfile",
      "LICENSE",
      "README.rdoc",
      "Rakefile",
@@ -53,6 +54,22 @@ Gem::Specification.new do |s|
   s.rubyforge_project = %q{datamapper}
   s.rubygems_version = %q{1.3.6}
   s.summary = %q{dm-is-remixable allow you to create reusable data functionality}
+  s.test_files = [
+    "spec/data/addressable.rb",
+     "spec/data/article.rb",
+     "spec/data/billable.rb",
+     "spec/data/bot.rb",
+     "spec/data/commentable.rb",
+     "spec/data/image.rb",
+     "spec/data/rating.rb",
+     "spec/data/tag.rb",
+     "spec/data/taggable.rb",
+     "spec/data/topic.rb",
+     "spec/data/user.rb",
+     "spec/data/viewable.rb",
+     "spec/integration/remixable_spec.rb",
+     "spec/spec_helper.rb"
+  ]
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
@@ -60,15 +77,21 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<dm-core>, ["~> 0.10.3"])
+      s.add_development_dependency(%q<dm-validations>, ["~> 0.10.3"])
+      s.add_development_dependency(%q<dm-types>, ["~> 0.10.3"])
       s.add_development_dependency(%q<rspec>, ["~> 1.3"])
       s.add_development_dependency(%q<yard>, ["~> 0.5"])
     else
       s.add_dependency(%q<dm-core>, ["~> 0.10.3"])
+      s.add_dependency(%q<dm-validations>, ["~> 0.10.3"])
+      s.add_dependency(%q<dm-types>, ["~> 0.10.3"])
       s.add_dependency(%q<rspec>, ["~> 1.3"])
       s.add_dependency(%q<yard>, ["~> 0.5"])
     end
   else
     s.add_dependency(%q<dm-core>, ["~> 0.10.3"])
+    s.add_dependency(%q<dm-validations>, ["~> 0.10.3"])
+    s.add_dependency(%q<dm-types>, ["~> 0.10.3"])
     s.add_dependency(%q<rspec>, ["~> 1.3"])
     s.add_dependency(%q<yard>, ["~> 0.5"])
   end
