@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-DataMapper.auto_migrate!
+describe 'DataMapper::Is::Remixable' do
 
-if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
-  describe 'DataMapper::Is::Remixable' do
+  supported_by :sqlite, :mysql, :postgres do
+
     describe 'DataMapper::Resource' do
       it "should know if it is remixable" do
         User.is_remixable?.should be(false)
@@ -309,5 +309,7 @@ if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
     it 'should allow the primary and child field names to be specified while remixing' do
       pending
     end
+
   end
+
 end
