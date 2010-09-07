@@ -12,6 +12,7 @@ begin
     gem.email       = 'dm-is-remixable [a] coryodaniel [d] com'
     gem.homepage    = 'http://github.com/datamapper/%s' % gem.name
     gem.authors     = [ "Cory O'Daniel" ]
+    gem.has_rdoc    = 'yard'
 
     gem.rubyforge_project = 'datamapper'
 
