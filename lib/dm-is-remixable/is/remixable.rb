@@ -68,7 +68,7 @@ module DataMapper
         @is_remixable = true
 
         # support clean suffixes for nested modules
-        default_suffix = ActiveSupport::Inflector.demodulize(self.name).singularize.underscore
+        default_suffix = DataMapper::Inflector.demodulize(self.name).singularize.underscore
         suffix(options.delete(:suffix) || default_suffix)
       end
 
@@ -157,7 +157,7 @@ module DataMapper
           # Example (from my upcoming dm-is-rateable gem)
           # remix n, "DataMapper::Is::Rateable::Rating", :as => :ratings
           remixable_module = case remixable
-            when Symbol then Object.full_const_get(ActiveSupport::Inflector.classify(remixable))
+            when Symbol then Object.full_const_get(DataMapper::Inflector.classify(remixable))
             when String then Object.full_const_get(remixable)
             when Module then remixable
           end
@@ -174,7 +174,7 @@ module DataMapper
           #Merge defaults/options
           options = {
             :as      => nil,
-            :model   => ActiveSupport::Inflector.classify(self.name.underscore + '_' + remixable_module.suffix.pluralize),
+            :model   => DataMapper::Inflector.classify(self.name.underscore + '_' + remixable_module.suffix.pluralize),
             :for     => nil,
             :on      => nil,
             :unique  => false,
@@ -183,10 +183,10 @@ module DataMapper
           }.update(options)
 
           #Make sure the class hasn't been remixed already
-          unless Object.full_const_defined?(ActiveSupport::Inflector.classify(options[:model]))
+          unless Object.full_const_defined?(DataMapper::Inflector.classify(options[:model]))
 
             #Storage name of our remixed model
-            options[:table_name] = ActiveSupport::Inflector.tableize(options[:model])
+            options[:table_name] = DataMapper::Inflector.tableize(options[:model])
 
             #Other model to mix with in case of M:M through Remixable
             options[:other_model] = options[:for] || options[:on]
@@ -197,7 +197,7 @@ module DataMapper
             # map the remixable to the remixed model
             # since this will be used from 'enhance api' i think it makes perfect sense to
             # always refer to a remixable by its demodulized underscored constant name
-            remixable_key = ActiveSupport::Inflector.demodulize(remixable_module.name).underscore.to_sym
+            remixable_key = DataMapper::Inflector.demodulize(remixable_module.name).underscore.to_sym
             populate_remixables_mapping(model, options.merge(:remixable_key => remixable_key))
 
             # attach RemixerClassMethods and RemixerInstanceMethods to remixer if defined by remixee
@@ -269,7 +269,7 @@ module DataMapper
           class_name = if remixable_model.nil?
             @remixables[remixable_name].keys.first
           else
-            ActiveSupport::Inflector.demodulize(remixable_model.to_s).underscore.to_sym
+            DataMapper::Inflector.demodulize(remixable_model.to_s).underscore.to_sym
           end
 
           model = @remixables[remixable_name][class_name][:model] unless @remixables[remixable_name][class_name].nil?
@@ -293,7 +293,7 @@ module DataMapper
           key = options[:remixable_key]
           accessor_name = options[:as] ? options[:as] : options[:table_name]
           @remixables[key] ||= {}
-          model_key = ActiveSupport::Inflector.demodulize(remixable_model.to_s).underscore.to_sym
+          model_key = DataMapper::Inflector.demodulize(remixable_model.to_s).underscore.to_sym
           @remixables[key][model_key] ||= {}
           @remixables[key][model_key][:reader] ||= accessor_name.to_sym
           @remixables[key][model_key][:writer] ||= "#{accessor_name}=".to_sym
@@ -309,7 +309,7 @@ module DataMapper
         #   options     <Hash> options hash
         def remix_one_to_many(cardinality, model, options)
           self.has cardinality, (options[:as] || options[:table_name]).to_sym, :model => model.name
-          model.property ActiveSupport::Inflector.foreign_key(self.name).intern, Integer, :min => 0, :required => true
+          model.property DataMapper::Inflector.foreign_key(self.name).intern, Integer, :min => 0, :required => true
           model.belongs_to belongs_to_name(self.name)
         end
 
@@ -321,7 +321,7 @@ module DataMapper
         #   model       <Class> remixed model that 'self' is relating through
         #   options     <Hash> options hash
         def remix_many_to_many(cardinality, model, options)
-          options[:other_model] = Object.full_const_get(ActiveSupport::Inflector.classify(options[:other_model]))
+          options[:other_model] = Object.full_const_get(DataMapper::Inflector.classify(options[:other_model]))
 
           #TODO if options[:unique] the two *_id's need to be a unique composite key, maybe even
           # attach a validates_is_unique if the validator is included.
