@@ -40,7 +40,7 @@ For example:
     is :remixable
   
     property :id,         Serial
-    property :opinion,    Enum.new("good","bad")
+    property :opinion,    Enum["good","bad"]
   end
 
   class Location
@@ -73,7 +73,7 @@ For example:
   
     enhance :addressables do
       storage_names[:default] = "a_different_table_name"
-      property :label, Enum.new("work","home")
+      property :label, Enum["work","home"]
   
       #This adds a column to user_addresses to store an address label
     end
