@@ -174,7 +174,7 @@ module DataMapper
           #Merge defaults/options
           options = {
             :as      => nil,
-            :model   => DataMapper::Inflector.classify(self.name.underscore + '_' + remixable_module.suffix.pluralize),
+            :model   => DataMapper::Inflector.camelize(self.name.underscore + '_' + remixable_module.suffix),
             :for     => nil,
             :on      => nil,
             :unique  => false,
@@ -186,7 +186,7 @@ module DataMapper
           unless Object.full_const_defined?(DataMapper::Inflector.classify(options[:model]))
 
             #Storage name of our remixed model
-            options[:table_name] = DataMapper::Inflector.tableize(options[:model])
+            options[:table_name] = DataMapper::Inflector.tableize(DataMapper::Inflector.demodulize(options[:model]))
 
             #Other model to mix with in case of M:M through Remixable
             options[:other_model] = options[:for] || options[:on]
@@ -310,7 +310,7 @@ module DataMapper
         def remix_one_to_many(cardinality, model, options)
           self.has cardinality, (options[:as] || options[:table_name]).to_sym, :model => model.name
           model.property DataMapper::Inflector.foreign_key(self.name).intern, Integer, :min => 0, :required => true
-          model.belongs_to belongs_to_name(self.name)
+          model.belongs_to belongs_to_name(self.name), self.name
         end
 
         # - remix_many_to_many
@@ -330,10 +330,10 @@ module DataMapper
           # Is M:M between two different classes or the same class
           unless self.name == options[:other_model].name
             self.has cardinality, (options[:as] || options[:table_name]).to_sym, :model => model.name
-            options[:other_model].has cardinality, options[:table_name].intern
+            options[:other_model].has cardinality, options[:table_name].intern, :model => model.name
 
-            model.belongs_to belongs_to_name(self.name)
-            model.belongs_to belongs_to_name(options[:other_model].name)
+            model.belongs_to belongs_to_name(self.name), self.name
+            model.belongs_to belongs_to_name(options[:other_model].name), options[:other_model].name
             if options[:connect]
               remixed = options[:as]
               remixed ||= options[:other_model].to_s.underscore
@@ -343,7 +343,7 @@ module DataMapper
             raise Exception, "options[:via] must be specified when Remixing a module between two of the same class" unless options[:via]
 
             self.has cardinality, (options[:as] || options[:table_name]).to_sym, :model => model.name
-            model.belongs_to belongs_to_name(self.name)
+            model.belongs_to belongs_to_name(self.name), self.name
             model.belongs_to options[:via].intern, :model => options[:other_model].name, :child_key => ["#{options[:via]}_id".intern]
           end
         end
@@ -400,7 +400,7 @@ module DataMapper
         end
 
         def belongs_to_name(class_name)
-          class_name.underscore.gsub(/\//, '_').to_sym
+          class_name.demodulize.underscore.gsub(/\//, '_').to_sym
         end
 
       private

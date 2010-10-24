@@ -10,6 +10,7 @@ describe 'DataMapper::Is::Remixable' do
         Image.is_remixable?.should be(true)
         Article.is_remixable?.should be(false)
         Commentable.is_remixable?.should be(true)
+        Portfolio::Project.is_remixable?.should be(false)
       end
     end
 
@@ -169,6 +170,30 @@ describe 'DataMapper::Is::Remixable' do
       user.user_addresses.length.should be(2)
     end
 
+    let(:project) { Portfolio::Project.new }
+
+    it 'should create the correctly named relationship when using namespaced Models' do
+      project.should_not respond_to(:portfolio_project_images)
+      project.should_not respond_to(:portfolio_project_views)
+      project.should respond_to(:project_images)
+      project.should respond_to(:project_views)
+    end
+
+    it 'should allow 1:M relationships with the Remixable Module and a namespaced Model' do
+      {
+        '123.202.201.209' => DateTime.parse('2009/01/02'),
+        '32.21.21.21'     => DateTime.parse('2010/05/12'),
+        '88.999.910.101'  => DateTime.parse('1999/12/15')
+      }.each do |ip, date|
+        view            = Portfolio::ProjectView.new
+        view.ip         = ip
+        view.created_at = date
+        project.project_views << view
+      end
+
+      project.project_views.length.should be(3)
+    end
+
     it "should allow 1:1 relationships with the Remixable Module" do
       article = Article.new
       image1  = ArticleImage.new
@@ -192,6 +217,30 @@ describe 'DataMapper::Is::Remixable' do
 
       article.pics = image2
       article.pics.path.should == image2.path
+    end
+
+    it "should allow 1:1 relationships with the Remixable Module and a namespaced Model" do
+      image1  = Portfolio::ProjectImage.new
+      image2  = Portfolio::ProjectImage.new
+
+      project.title = "My best work"
+      project.url   = "http://example.com/work/success-in-five-steps.html"
+
+      image1.description  = 'Business Failure'
+      image1.path         = '~/pictures/biz.jpg'
+
+      image2.description  = '73 Signals Sucess'
+      image2.path         = '~/pictures/hhd.png'
+
+      begin
+        project.project_images << image1
+        false
+      rescue Exception => e
+        e.class.should be(NoMethodError)
+      end
+
+      project.project_images = image2
+      project.project_images.path.should == image2.path
     end
 
     # Example:
@@ -224,6 +273,27 @@ describe 'DataMapper::Is::Remixable' do
 
       article.comments.first.should == ac
       user.article_comments.first.should == ac
+    end
+
+    it 'should allow M:M relationships through the Remixable Module and a namespaced Model' do
+      user    = User.new
+      pc      = Portfolio::ProjectComment.new
+
+      user.first_name = 'John'
+      user.last_name  = 'Jameson'
+      user.save
+
+      project.url   = 'http://example.com/'
+      project.title = 'A showcase of my best work'
+      project.save
+
+      pc.comment = 'You overprice your work!'
+      pc.user    = user
+      pc.project = project
+      pc.save
+
+      project.comments.first.should == pc
+      user.project_comments.first.should == pc
     end
 
     # Example:
