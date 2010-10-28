@@ -11,7 +11,7 @@ rescue LoadError
   end
 end
 
-# reopen sam/extlib/lib/extlib/object.rb
+# reopen datamapper/extlib/lib/extlib/object.rb
 class Object
 
   def full_const_defined?(name)
