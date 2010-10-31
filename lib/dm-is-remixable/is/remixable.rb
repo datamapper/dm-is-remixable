@@ -400,7 +400,7 @@ module DataMapper
         end
 
         def belongs_to_name(class_name)
-          class_name.demodulize.underscore.gsub(/\//, '_').to_sym
+          DataMapper::Inflector.demodulize(class_name).underscore.gsub(/\//, '_').to_sym
         end
 
       private
