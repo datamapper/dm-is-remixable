@@ -19,6 +19,9 @@ require 'data/taggable'
 require 'data/topic'
 require 'data/user'
 require 'data/viewable'
+require 'data/boss/commandable'
+require 'data/boss/admin'
+
 
 Spec::Runner.configure do |config|
   config.extend(DataMapper::Spec::Adapters::Helpers)

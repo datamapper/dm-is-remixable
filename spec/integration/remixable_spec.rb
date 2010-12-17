@@ -380,6 +380,12 @@ describe 'DataMapper::Is::Remixable' do
       pending
     end
 
+    it "should create a remixed class in the same namespace as the remixee" do
+      Boss.constants.should be_include("AdminCommand")
+      Boss.constants.should be_include("AdminComment")
+      Object.constants.should_not be_include("AdminComment")
+    end
+
   end
 
 end

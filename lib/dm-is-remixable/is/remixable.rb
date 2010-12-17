@@ -157,8 +157,8 @@ module DataMapper
           # Example (from my upcoming dm-is-rateable gem)
           # remix n, "DataMapper::Is::Rateable::Rating", :as => :ratings
           remixable_module = case remixable
-            when Symbol then Object.full_const_get(DataMapper::Inflector.classify(remixable))
-            when String then Object.full_const_get(remixable)
+            when Symbol then self.find_const(DataMapper::Inflector.classify(remixable))
+            when String then self.find_const(remixable)
             when Module then remixable
           end
 
