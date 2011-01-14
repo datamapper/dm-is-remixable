@@ -357,13 +357,13 @@ module DataMapper
         # ==== Returns
         #   <Class> remixed model
         def generate_remixed_model(remixable,options)
-          #Create Remixed Model
-          klass = Class.new Object do
-            include DataMapper::Resource
-          end
 
-          # Give remixed model a name and create its constant
-          model = Object.full_const_set(options[:model], klass)
+          # Create Remixed Model
+          # TODO clean this up!
+          parts     = options[:model].split('::')
+          name      = parts.last
+          namespace = Object.full_const_get((parts - [name]).join('::'))
+          model     = Model.new(name, namespace)
 
           # Get instance methods and the :default context validator
           model.send(:include,remixable)
