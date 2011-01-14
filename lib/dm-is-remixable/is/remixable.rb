@@ -381,8 +381,7 @@ module DataMapper
 
           # Port the properties over
           remixable.properties.each do |prop|
-            type = prop.type ? prop.type : prop.class
-            model.property(prop.name, type, prop.options)
+            model.property(prop.name, prop.class, prop.options)
           end
 
           # Attach remixed model access to RemixeeClassMethods and RemixeeInstanceMethods if defined
