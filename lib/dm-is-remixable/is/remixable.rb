@@ -363,10 +363,10 @@ module DataMapper
           parts     = options[:model].split('::')
           name      = parts.last
           namespace = Object.full_const_get((parts - [name]).join('::'))
-          model     = Model.new(name, namespace)
 
-          # Get instance methods and the :default context validator
-          model.send(:include,remixable)
+          model = Model.new(name, namespace) do
+            include remixable
+          end
 
           if DataMapper.const_defined?('Validations')
 
