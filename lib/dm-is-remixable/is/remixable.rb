@@ -11,11 +11,10 @@ rescue LoadError
   end
 end
 
-# reopen datamapper/extlib/lib/extlib/object.rb
-class Object
+class DataMapper::Ext::Object
 
-  def full_const_defined?(name)
-    !!full_const_get(name) rescue false
+  def self.full_const_defined?(obj, name = nil)
+    !!self.full_const_get(obj, name) rescue false
   end
 
 end
@@ -157,8 +156,8 @@ module DataMapper
           # Example (from my upcoming dm-is-rateable gem)
           # remix n, "DataMapper::Is::Rateable::Rating", :as => :ratings
           remixable_module = case remixable
-            when Symbol then Object.full_const_get(DataMapper::Inflector.classify(remixable))
-            when String then Object.full_const_get(remixable)
+            when Symbol then DataMapper::Ext::Object.full_const_get(Object, DataMapper::Inflector.classify(remixable))
+            when String then DataMapper::Ext::Object.full_const_get(Object, remixable)
             when Module then remixable
           end
 
@@ -183,7 +182,7 @@ module DataMapper
           }.update(options)
 
           #Make sure the class hasn't been remixed already
-          unless Object.full_const_defined?(DataMapper::Inflector.classify(options[:model]))
+          unless DataMapper::Ext::Object.full_const_defined?(DataMapper::Inflector.classify(options[:model]))
 
             #Storage name of our remixed model
             options[:table_name] = DataMapper::Inflector.tableize(DataMapper::Inflector.demodulize(options[:model]))
@@ -201,12 +200,12 @@ module DataMapper
             populate_remixables_mapping(model, options.merge(:remixable_key => remixable_key))
 
             # attach RemixerClassMethods and RemixerInstanceMethods to remixer if defined by remixee
-            if Object.full_const_defined? "#{remixable_module}::RemixerClassMethods"
-              extend Object.full_const_get("#{remixable_module}::RemixerClassMethods")
+            if DataMapper::Ext::Object.full_const_defined? "#{remixable_module}::RemixerClassMethods"
+              extend DataMapper::Ext::Object.full_const_get("#{remixable_module}::RemixerClassMethods")
             end
 
-            if Object.full_const_defined? "#{remixable_module}::RemixerInstanceMethods"
-              include Object.full_const_get("#{remixable_module}::RemixerInstanceMethods")
+            if DataMapper::Ext::Object.full_const_defined? "#{remixable_module}::RemixerInstanceMethods"
+              include DataMapper::Ext::Object.full_const_get("#{remixable_module}::RemixerInstanceMethods")
             end
 
             #Create relationships between Remixer and remixed class
@@ -321,7 +320,7 @@ module DataMapper
         #   model       <Class> remixed model that 'self' is relating through
         #   options     <Hash> options hash
         def remix_many_to_many(cardinality, model, options)
-          options[:other_model] = Object.full_const_get(DataMapper::Inflector.classify(options[:other_model]))
+          options[:other_model] = DataMapper::Ext::Object.full_const_get(DataMapper::Inflector.classify(options[:other_model]))
 
           #TODO if options[:unique] the two *_id's need to be a unique composite key, maybe even
           # attach a validates_is_unique if the validator is included.
@@ -362,7 +361,7 @@ module DataMapper
           # TODO clean this up!
           parts     = options[:model].split('::')
           name      = parts.last
-          namespace = Object.full_const_get((parts - [name]).join('::'))
+          namespace = DataMapper::Ext::Object.full_const_get((parts - [name]).join('::'))
 
           model = Model.new(name, namespace) do
             include remixable
@@ -385,12 +384,12 @@ module DataMapper
           end
 
           # Attach remixed model access to RemixeeClassMethods and RemixeeInstanceMethods if defined
-          if Object.full_const_defined? "#{remixable}::RemixeeClassMethods"
-            model.send :extend, Object.full_const_get("#{remixable}::RemixeeClassMethods")
+          if DataMapper::Ext::Object.full_const_defined? "#{remixable}::RemixeeClassMethods"
+            model.send :extend, DataMapper::Ext::Object.full_const_get("#{remixable}::RemixeeClassMethods")
           end
 
-          if Object.full_const_defined? "#{remixable}::RemixeeInstanceMethods"
-            model.send :include, Object.full_const_get("#{remixable}::RemixeeInstanceMethods")
+          if DataMapper::Ext::Object.full_const_defined? "#{remixable}::RemixeeInstanceMethods"
+            model.send :include, DataMapper::Ext::Object.full_const_get("#{remixable}::RemixeeInstanceMethods")
           end
 
           clone_hooks(remixable, model)
