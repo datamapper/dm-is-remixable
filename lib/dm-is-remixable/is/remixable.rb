@@ -1,23 +1,10 @@
 require 'dm-core'
+require 'dm-core/support/inflector'
 
-begin
-  require 'active_support/inflector'
-rescue LoadError
-  require 'extlib/inflection'
-  class String
-    def underscore
-      Extlib::Inflection.underscore(self)
-    end
+module DataMapper::Ext::Object
+  def self.full_const_defined?(obj, name = nil)
+    !!self.full_const_get(obj, name) rescue false
   end
-end
-
-# reopen datamapper/extlib/lib/extlib/object.rb
-class Object
-
-  def full_const_defined?(name)
-    !!full_const_get(name) rescue false
-  end
-
 end
 
 module DataMapper
@@ -68,7 +55,10 @@ module DataMapper
         @is_remixable = true
 
         # support clean suffixes for nested modules
-        default_suffix = DataMapper::Inflector.demodulize(self.name).singularize.underscore
+        inflector = DataMapper::Inflector
+        default_suffix = inflector.demodulize(self.name)
+        default_suffix = inflector.singularize(default_suffix)
+        default_suffix = inflector.underscore(default_suffix)
         suffix(options.delete(:suffix) || default_suffix)
       end
 
@@ -157,8 +147,8 @@ module DataMapper
           # Example (from my upcoming dm-is-rateable gem)
           # remix n, "DataMapper::Is::Rateable::Rating", :as => :ratings
           remixable_module = case remixable
-            when Symbol then Object.full_const_get(DataMapper::Inflector.classify(remixable))
-            when String then Object.full_const_get(remixable)
+            when Symbol then DataMapper::Ext::Object.full_const_get(Object, DataMapper::Inflector.classify(remixable))
+            when String then DataMapper::Ext::Object.full_const_get(Object, remixable)
             when Module then remixable
           end
 
@@ -171,10 +161,14 @@ module DataMapper
             options[:model] = options.delete(:class_name)
           end
 
+          inflector = DataMapper::Inflector
+          model = inflector.underscore(self.name)
+          model = inflector.camelize(model + '_' + remixable_module.suffix)
+
           #Merge defaults/options
           options = {
             :as      => nil,
-            :model   => DataMapper::Inflector.camelize(self.name.underscore + '_' + remixable_module.suffix),
+            :model   => model,
             :for     => nil,
             :on      => nil,
             :unique  => false,
@@ -183,10 +177,10 @@ module DataMapper
           }.update(options)
 
           #Make sure the class hasn't been remixed already
-          unless Object.full_const_defined?(DataMapper::Inflector.classify(options[:model]))
+          unless DataMapper::Ext::Object.full_const_defined?(inflector.classify(options[:model]))
 
             #Storage name of our remixed model
-            options[:table_name] = DataMapper::Inflector.tableize(DataMapper::Inflector.demodulize(options[:model]))
+            options[:table_name] = DataMapper::Inflector.tableize(inflector.demodulize(options[:model]))
 
             #Other model to mix with in case of M:M through Remixable
             options[:other_model] = options[:for] || options[:on]
@@ -197,16 +191,17 @@ module DataMapper
             # map the remixable to the remixed model
             # since this will be used from 'enhance api' i think it makes perfect sense to
             # always refer to a remixable by its demodulized underscored constant name
-            remixable_key = DataMapper::Inflector.demodulize(remixable_module.name).underscore.to_sym
+            remixable_key = inflector.demodulize(remixable_module.name)
+            remixable_key = inflector.underscore(remixable_key).to_sym
             populate_remixables_mapping(model, options.merge(:remixable_key => remixable_key))
 
             # attach RemixerClassMethods and RemixerInstanceMethods to remixer if defined by remixee
-            if Object.full_const_defined? "#{remixable_module}::RemixerClassMethods"
-              extend Object.full_const_get("#{remixable_module}::RemixerClassMethods")
+            if DataMapper::Ext::Object.full_const_defined? "#{remixable_module}::RemixerClassMethods"
+              extend DataMapper::Ext::Object.full_const_get("#{remixable_module}::RemixerClassMethods")
             end
 
-            if Object.full_const_defined? "#{remixable_module}::RemixerInstanceMethods"
-              include Object.full_const_get("#{remixable_module}::RemixerInstanceMethods")
+            if DataMapper::Ext::Object.full_const_defined? "#{remixable_module}::RemixerInstanceMethods"
+              include DataMapper::Ext::Object.full_const_get("#{remixable_module}::RemixerInstanceMethods")
             end
 
             #Create relationships between Remixer and remixed class
@@ -264,12 +259,16 @@ module DataMapper
         #       belongs_to :tag
         #     end
         def enhance(remixable,remixable_model=nil, &block)
+          inflector = DataMapper::Inflector
+
           # always use innermost singular underscored constant name
-          remixable_name = remixable.to_s.singularize.underscore.to_sym
+          remixable_name = inflector.singularize(remixable.to_s)
+          remixable_name = inflector.underscore(remixable_name).to_sym
           class_name = if remixable_model.nil?
             @remixables[remixable_name].keys.first
           else
-            DataMapper::Inflector.demodulize(remixable_model.to_s).underscore.to_sym
+            name = inflector.demodulize(remixable_model.to_s)
+            inflector.underscore(name).to_sym
           end
 
           model = @remixables[remixable_name][class_name][:model] unless @remixables[remixable_name][class_name].nil?
@@ -293,7 +292,11 @@ module DataMapper
           key = options[:remixable_key]
           accessor_name = options[:as] ? options[:as] : options[:table_name]
           @remixables[key] ||= {}
-          model_key = DataMapper::Inflector.demodulize(remixable_model.to_s).underscore.to_sym
+
+          inflector = DataMapper::Inflector
+          model_key = inflector.demodulize(remixable_model.to_s)
+          model_key = inflector.underscore(model_key).to_sym
+
           @remixables[key][model_key] ||= {}
           @remixables[key][model_key][:reader] ||= accessor_name.to_sym
           @remixables[key][model_key][:writer] ||= "#{accessor_name}=".to_sym
@@ -321,7 +324,7 @@ module DataMapper
         #   model       <Class> remixed model that 'self' is relating through
         #   options     <Hash> options hash
         def remix_many_to_many(cardinality, model, options)
-          options[:other_model] = Object.full_const_get(DataMapper::Inflector.classify(options[:other_model]))
+          options[:other_model] = DataMapper::Ext::Object.full_const_get(DataMapper::Inflector.classify(options[:other_model]))
 
           #TODO if options[:unique] the two *_id's need to be a unique composite key, maybe even
           # attach a validates_is_unique if the validator is included.
@@ -362,7 +365,7 @@ module DataMapper
           # TODO clean this up!
           parts     = options[:model].split('::')
           name      = parts.last
-          namespace = Object.full_const_get((parts - [name]).join('::'))
+          namespace = DataMapper::Ext::Object.full_const_get((parts - [name]).join('::'))
 
           model = Model.new(name, namespace) do
             include remixable
@@ -385,12 +388,12 @@ module DataMapper
           end
 
           # Attach remixed model access to RemixeeClassMethods and RemixeeInstanceMethods if defined
-          if Object.full_const_defined? "#{remixable}::RemixeeClassMethods"
-            model.send :extend, Object.full_const_get("#{remixable}::RemixeeClassMethods")
+          if DataMapper::Ext::Object.full_const_defined? "#{remixable}::RemixeeClassMethods"
+            model.send :extend, DataMapper::Ext::Object.full_const_get("#{remixable}::RemixeeClassMethods")
           end
 
-          if Object.full_const_defined? "#{remixable}::RemixeeInstanceMethods"
-            model.send :include, Object.full_const_get("#{remixable}::RemixeeInstanceMethods")
+          if DataMapper::Ext::Object.full_const_defined? "#{remixable}::RemixeeInstanceMethods"
+            model.send :include, DataMapper::Ext::Object.full_const_get("#{remixable}::RemixeeInstanceMethods")
           end
 
           clone_hooks(remixable, model)
@@ -399,7 +402,9 @@ module DataMapper
         end
 
         def belongs_to_name(class_name)
-          DataMapper::Inflector.demodulize(class_name).underscore.gsub(/\//, '_').to_sym
+          name = DataMapper::Inflector.demodulize(class_name)
+          name = DataMapper::Inflector.underscore(name)
+          name.gsub(/\//, '_').to_sym
         end
 
       private
