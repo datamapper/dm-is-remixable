@@ -1,5 +1,4 @@
 require 'dm-core'
-require 'dm-core/support/inflector'
 
 module DataMapper::Ext::Object
   def self.full_const_defined?(obj, name = nil)
