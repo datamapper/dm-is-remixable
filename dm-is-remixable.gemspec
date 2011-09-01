@@ -4,14 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{dm-is-remixable}
+  s.name = "dm-is-remixable"
   s.version = "1.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Cory O'Daniel"]
-  s.date = %q{2011-04-28}
-  s.description = %q{dm-is-remixable allow you to create reusable data functionality}
-  s.email = %q{dm-is-remixable [a] coryodaniel [d] com}
+  s.date = "2011-09-01"
+  s.description = "dm-is-remixable allow you to create reusable data functionality"
+  s.email = "dm-is-remixable [a] coryodaniel [d] com"
   s.extra_rdoc_files = [
     "LICENSE",
     "README.rdoc"
@@ -46,28 +46,11 @@ Gem::Specification.new do |s|
     "tasks/yard.rake",
     "tasks/yardstick.rake"
   ]
-  s.homepage = %q{http://github.com/datamapper/dm-is-remixable}
+  s.homepage = "http://github.com/datamapper/dm-is-remixable"
   s.require_paths = ["lib"]
-  s.rubyforge_project = %q{datamapper}
-  s.rubygems_version = %q{1.6.2}
-  s.summary = %q{dm-is-remixable allow you to create reusable data functionality}
-  s.test_files = [
-    "spec/data/addressable.rb",
-    "spec/data/article.rb",
-    "spec/data/billable.rb",
-    "spec/data/bot.rb",
-    "spec/data/commentable.rb",
-    "spec/data/image.rb",
-    "spec/data/project.rb",
-    "spec/data/rating.rb",
-    "spec/data/tag.rb",
-    "spec/data/taggable.rb",
-    "spec/data/topic.rb",
-    "spec/data/user.rb",
-    "spec/data/viewable.rb",
-    "spec/integration/remixable_spec.rb",
-    "spec/spec_helper.rb"
-  ]
+  s.rubyforge_project = "datamapper"
+  s.rubygems_version = "1.8.10"
+  s.summary = "dm-is-remixable allow you to create reusable data functionality"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
@@ -76,24 +59,24 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<dm-core>, ["~> 1.1.0"])
       s.add_development_dependency(%q<dm-validations>, ["~> 1.1.0"])
       s.add_development_dependency(%q<dm-types>, ["~> 1.1.0"])
-      s.add_development_dependency(%q<jeweler>, ["~> 1.5.2"])
-      s.add_development_dependency(%q<rake>, ["~> 0.8.7"])
-      s.add_development_dependency(%q<rspec>, ["~> 1.3.1"])
+      s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
+      s.add_development_dependency(%q<rake>, ["~> 0.9.2"])
+      s.add_development_dependency(%q<rspec>, ["~> 1.3.2"])
     else
       s.add_dependency(%q<dm-core>, ["~> 1.1.0"])
       s.add_dependency(%q<dm-validations>, ["~> 1.1.0"])
       s.add_dependency(%q<dm-types>, ["~> 1.1.0"])
-      s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
-      s.add_dependency(%q<rake>, ["~> 0.8.7"])
-      s.add_dependency(%q<rspec>, ["~> 1.3.1"])
+      s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
+      s.add_dependency(%q<rake>, ["~> 0.9.2"])
+      s.add_dependency(%q<rspec>, ["~> 1.3.2"])
     end
   else
     s.add_dependency(%q<dm-core>, ["~> 1.1.0"])
     s.add_dependency(%q<dm-validations>, ["~> 1.1.0"])
     s.add_dependency(%q<dm-types>, ["~> 1.1.0"])
-    s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
-    s.add_dependency(%q<rake>, ["~> 0.8.7"])
-    s.add_dependency(%q<rspec>, ["~> 1.3.1"])
+    s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
+    s.add_dependency(%q<rake>, ["~> 0.9.2"])
+    s.add_dependency(%q<rspec>, ["~> 1.3.2"])
   end
 end
 
