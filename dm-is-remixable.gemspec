@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Cory O'Daniel"]
-  s.date = "2011-09-05"
+  s.date = "2011-09-09"
   s.description = "dm-is-remixable allow you to create reusable data functionality"
   s.email = "dm-is-remixable [a] coryodaniel [d] com"
   s.extra_rdoc_files = [
